@@ -1,0 +1,35 @@
+{
+  "name": "antigravity-token-monitor",
+  "version": "1.0.0",
+  "description": "Windows desktop taskbar token monitor for Google Antigravity",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron .",
+    "package": "electron-builder --win portable"
+  },
+  "keywords": [
+    "antigravity",
+    "token",
+    "monitor",
+    "electron"
+  ],
+  "author": "Antigravity",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^30.0.0",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.antigravity.token-monitor",
+    "productName": "AntigravityTokenMonitor",
+    "win": {
+      "target": [
+        "portable"
+      ]
+    },
+    "directories": {
+      "output": "dist"
+    }
+  }
+}
