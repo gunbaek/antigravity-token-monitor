@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Antigravity Quota Monitor</title>
+    <link rel="stylesheet" href="index.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Frameless Titlebar -->
+        <header class="titlebar">
+            <div class="titlebar-logo">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                </svg>
+                <span>ANTIGRAVITY MONITOR</span>
+            </div>
+            <div class="titlebar-controls">
+                <button class="control-btn" id="btn-minimize" title="Minimize to Tray">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                </button>
+                <button class="control-btn close" id="btn-close" title="Close to Tray">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content Scroll Area -->
+        <main class="content-area">
+            <!-- User Status Card -->
+            <section class="user-card">
+                <div class="user-info">
+                    <h2 id="user-tier-name">Loading Profile...</h2>
+                    <p id="user-tier-desc">Checking authorization status</p>
+                </div>
+                <div class="status-badge" id="conn-status">
+                    <span class="dot"></span>
+                    <span id="conn-status-text">Disconnected</span>
+                </div>
+            </section>
+
+            <!-- Quota Models List -->
+            <section>
+                <h3 class="section-title">Model Token Quotas</h3>
+                <div class="quota-grid" id="quota-grid">
+                    <!-- Cards will be populated dynamically -->
+                    <div style="text-align: center; padding: 40px; color: var(--text-muted); font-size: 13px;">
+                        Loading quota details...
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Hidden Canvas for Tray Icon Rendering -->
+        <canvas id="tray-canvas" width="32" height="32" style="display: none;"></canvas>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="update-status">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+                </svg>
+                <span id="last-updated">Updating...</span>
+            </div>
+            <button class="settings-btn" id="btn-settings">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="3"></circle>
+                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                </svg>
+                <span>Settings</span>
+            </button>
+        </footer>
+
+        <!-- Settings Modal -->
+        <div class="modal-overlay" id="settings-overlay">
+            <div class="modal">
+                <div class="modal-header">
+                    <h3>Monitor Settings</h3>
+                </div>
+                <div class="modal-body">
+                    <!-- Primary Model to Monitor -->
+                    <div class="form-group">
+                        <label for="select-model">Model for Taskbar/Tray</label>
+                        <select class="form-control" id="select-model">
+                            <option value="Gemini 3.5 Flash (Medium)">Gemini 3.5 Flash (Medium)</option>
+                            <option value="Gemini 3.5 Flash (High)">Gemini 3.5 Flash (High)</option>
+                            <option value="Gemini 3.1 Pro (High)">Gemini 3.1 Pro (High)</option>
+                            <option value="Claude Sonnet 4.6 (Thinking)">Claude Sonnet 4.6 (Thinking)</option>
+                            <option value="Claude Opus 4.6 (Thinking)">Claude Opus 4.6 (Thinking)</option>
+                            <option value="GPT-OSS 120B (Medium)">GPT-OSS 120B (Medium)</option>
+                        </select>
+                    </div>
+
+                    <!-- Refresh Interval -->
+                    <div class="form-group">
+                        <label for="input-interval">Refresh Interval (seconds)</label>
+                        <input type="number" class="form-control" id="input-interval" min="10" max="600" value="30">
+                    </div>
+
+                    <!-- Alert Threshold -->
+                    <div class="form-group">
+                        <label for="input-threshold">Alert Threshold (%)</label>
+                        <input type="number" class="form-control" id="input-threshold" min="5" max="95" value="20">
+                    </div>
+
+                    <!-- Show notifications checkbox -->
+                    <div class="checkbox-group" id="checkbox-container">
+                        <input type="checkbox" id="checkbox-notifications" checked>
+                        <span>Show desktop warning notifications</span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" id="btn-cancel-settings">Cancel</button>
+                    <button class="btn btn-primary" id="btn-save-settings">Save Settings</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="index.js"></script>
+</body>
+</html>
