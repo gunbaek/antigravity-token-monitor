@@ -67,13 +67,13 @@ function handleStatusUpdate(status) {
         userTierName.innerText = "Antigravity Inactive";
         userTierDesc.innerText = status.error;
         
-        connStatus.className = "status-badge error";
+        connStatus.className = "status-indicator error";
         connStatusText.innerText = "Disconnected";
         
         quotaGrid.innerHTML = `
-            <div style="text-align: center; padding: 40px; color: var(--text-muted); font-size: 13px;">
+            <div style="text-align: center; padding: 40px; color: var(--text-muted); font-size: 12px;">
                 ${status.error}<br>
-                <span style="font-size: 11px; margin-top: 8px; display: inline-block;">Make sure the Antigravity desktop application is open.</span>
+                <span style="font-size: 11px; margin-top: 6px; display: inline-block;">Make sure the Antigravity desktop application is open.</span>
             </div>
         `;
         
@@ -94,7 +94,7 @@ function handleStatusUpdate(status) {
         userTierName.innerText = tierName;
         userTierDesc.innerText = tierDesc;
         
-        connStatus.className = "status-badge";
+        connStatus.className = "status-indicator connected";
         connStatusText.innerText = "Connected";
 
         // Get list of client model configurations
@@ -103,10 +103,10 @@ function handleStatusUpdate(status) {
         // Dynamically update the settings model dropdown options if new models discovered
         updateModelDropdownOptions(configs);
 
-        // Populate quota cards
+        // Populate quota rows
         if (configs.length === 0) {
             quotaGrid.innerHTML = `
-                <div style="text-align: center; padding: 40px; color: var(--text-muted); font-size: 13px;">
+                <div style="text-align: center; padding: 40px; color: var(--text-muted); font-size: 12px;">
                     No model configurations found.
                 </div>
             `;
@@ -138,57 +138,49 @@ function handleStatusUpdate(status) {
                 }
             }
 
-            // Determine color class based on remaining fraction
-            let colorClass = 'status-green';
+            // Determine colors based on remaining fraction
+            let textColor = 'text-green';
+            let bgColor = 'bg-green';
+            
             if (remainingPercent <= currentSettings.alertThreshold) {
-                colorClass = 'status-red';
-                // Trigger notification if configured and not notified yet
+                textColor = 'text-red';
+                bgColor = 'bg-red';
+                // Trigger notification
                 triggerLowQuotaNotification(cfg.label, remainingPercent);
             } else if (remainingPercent <= 50) {
-                colorClass = 'status-yellow';
-                // Reset notification flag when quota recovers
+                textColor = 'text-yellow';
+                bgColor = 'bg-yellow';
                 delete notifiedModels[cfg.label];
             } else {
                 delete notifiedModels[cfg.label];
             }
 
             // Check if this model is the primary model we are monitoring
-            if (cfg.label === currentSettings.primaryModel) {
+            const isActive = cfg.label === currentSettings.primaryModel;
+            if (isActive) {
                 primaryModelConfig = cfg;
             }
 
-            // Calculate SVG stroke offset for progress circle
-            // Circumference is 2 * pi * r = 2 * 3.14159 * 23 = 144.5
-            const radius = 23;
-            const circumference = 2 * Math.PI * radius;
-            const strokeDashoffset = circumference - (remainingFraction * circumference);
+            const activeClass = isActive ? 'active' : '';
 
             gridHtml += `
-                <div class="quota-card" onclick="setPrimaryModel('${cfg.label}')">
-                    <div class="progress-circle-container">
-                        <svg class="progress-circle">
-                            <circle class="bg" cx="27" cy="27" r="${radius}"></circle>
-                            <circle class="bar ${colorClass}" cx="27" cy="27" r="${radius}" 
-                                    stroke-dasharray="${circumference}" 
-                                    stroke-dashoffset="${strokeDashoffset}"></circle>
-                        </svg>
-                        <div class="progress-percentage ${colorClass}">${remainingPercent}%</div>
-                    </div>
-                    <div class="quota-details">
-                        <div class="quota-header">
-                            <div class="model-name" title="${cfg.label}">${cfg.label}</div>
-                            <div class="reset-time">
-                                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                    <circle cx="12" cy="12" r="10"></circle>
-                                    <polyline points="12 6 12 12 16 14"></polyline>
-                                </svg>
-                                <span>${resetText}</span>
-                            </div>
-                        </div>
-                        <div class="quota-status-text">
-                            ${cfg.label === currentSettings.primaryModel ? '★ Monitoring Active' : 'Click to monitor in taskbar'}
+                <div class="quota-row ${activeClass}" onclick="setPrimaryModel('${cfg.label}')">
+                    <div class="row-left">
+                        <div class="row-model-name" title="${cfg.label}">${cfg.label}</div>
+                        <div class="row-model-desc">
+                            <span>${resetText}</span>
                         </div>
                     </div>
+                    <div class="row-right">
+                        <span class="percentage-text ${textColor}">${remainingPercent}%</span>
+                        <div class="progress-bar-bg">
+                            <div class="progress-bar-fill ${bgColor}" style="width: ${remainingPercent}%;"></div>
+                        </div>
+                    </div>
+                    <!-- Custom SVG star indicator -->
+                    <svg class="star-indicator" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                    </svg>
                 </div>
             `;
         });
@@ -244,7 +236,7 @@ function updateModelDropdownOptions(configs) {
     }
 }
 
-// Click quota card to set as primary monitoring model
+// Click quota row to set as primary monitoring model
 function setPrimaryModel(modelLabel) {
     currentSettings.primaryModel = modelLabel;
     selectModel.value = modelLabel;
